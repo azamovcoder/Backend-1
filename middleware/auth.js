@@ -8,7 +8,7 @@ export const auth = (req, res, next) => {
 
   if (!token) {
     return res.status(401).json({
-      msg: "Access denied.",
+      msg: "Token undefined",
       variant: "error",
       payload: null,
     });

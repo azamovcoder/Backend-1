@@ -4,7 +4,6 @@ import { auth } from "../middleware/auth.js";
 import express from "express";
 
 const router = express.Router();
-
 router.get("/get/admins", [auth], AdminController.getAllAdmins);
 router.post("/sign-up", AdminController.singUp);
 router.post("/sign-in", AdminController.signIn);
