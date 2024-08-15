@@ -36,7 +36,6 @@ class CategoryController {
       }
       const category = await Category.create({
         ...req.body,
-        userId: req.user._id,
       });
       res.status(201).json({
         msg: "Category is created",

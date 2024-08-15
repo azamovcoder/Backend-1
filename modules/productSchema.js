@@ -31,12 +31,12 @@ const productSchema = new Schema(
     },
     categoryId: {
       type: Schema.Types.ObjectId,
-      ref: "Category",
+      ref: "category",
       required: true,
     },
     adminId: {
       type: Schema.Types.ObjectId,
-      ref: "Admin",
+      ref: "admin",
       required: true,
     },
     units: {
@@ -56,7 +56,7 @@ const productSchema = new Schema(
     info: {
       type: Array,
       required: true,
-      default: "[]",
+      default: [],
     },
     available: {
       type: Boolean,
@@ -79,12 +79,12 @@ export const validateProduct = (body) => {
     Stock: Joi.number().required(),
     Rating: Joi.number().required(),
     Views: Joi.number(),
-    // categoryId: Joi.string().required(),
+    categoryId: Joi.string().required(),
     // adminId: Joi.string().required(),
     units: Joi.string().valid("kg", "m", "litr").required(),
     description: Joi.string().required(),
-    urls: Joi.array().items(Joi.string().uri()).allow("[]"), // Massiv va URL elementlar
-    info: Joi.array().items(Joi.string()).allow("[]"), // Massiv va string elementlar
+    urls: Joi.array().items(Joi.string().uri()).allow("[]"),
+    info: Joi.string(),
     available: Joi.boolean().required().allow(true),
   });
   return schema.validate(body);

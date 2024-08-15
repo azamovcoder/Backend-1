@@ -3,7 +3,39 @@ import { Products, validateProduct } from "../modules/productSchema.js";
 class ProductsController {
   async get(req, res) {
     try {
-      const product = await Products.find().sort({ createdAt: -1 });
+      const product = await Products.find()
+        .populate([{ path: "adminId", select: ["fname", "lname"] }])
+        .sort({ createdAt: -1 });
+      if (!product.length) {
+        return res.status(400).json({
+          msg: "Products is not defined",
+          variant: "error",
+          payload: null,
+        });
+      }
+      res.status(200).json({
+        msg: "All product",
+        variant: "success",
+        payload: product,
+      });
+    } catch {
+      res.status(500).json({
+        msg: "Server error",
+        variant: "error",
+        payload: null,
+      });
+    }
+  }
+  async getCategory(req, res) {
+    try {
+      let { categoryId } = req.params;
+
+      const product = await Products.find({ categoryId })
+        .populate([
+          { path: "adminId", select: ["fname", "lname"] },
+          { path: "categoryId", select: ["title"] },
+        ])
+        .sort({ createdAt: -1 });
       if (!product.length) {
         return res.status(400).json({
           msg: "Products is not defined",
@@ -38,15 +70,16 @@ class ProductsController {
       const urls = req.files
         ? req.files.map(
             (file) =>
-              `${req.protocol}://${req.get("host")}/upload/${file.filename}`
+              `${req.protocol}://${req.get("host")}/images/${file.filename}`
           )
         : [];
 
       const product = await Products.create({
         ...req.body,
-        categoryId: req.admin._id,
+        // categoryId: req.admin._id,
         adminId: req.admin._id,
         urls,
+        info: JSON.parse(req.body.info),
       });
 
       res.status(201).json({
