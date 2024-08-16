@@ -1,24 +1,31 @@
 import { Products, validateProduct } from "../modules/productSchema.js";
 
+import { Category } from "../modules/categorySchema.js";
+
 class ProductsController {
   async get(req, res) {
     try {
-      const product = await Products.find()
-        .populate([{ path: "adminId", select: ["fname", "lname"] }])
-        .sort({ createdAt: -1 });
-      if (!product.length) {
+      let { limit, skip } = req.query;
+      const products = await Products.find()
+        .populate([{ path: "adminId", select: ["fname", "username"] }])
+        .sort({ createdAt: -1 })
+        .limit(limit)
+        .skip(limit * skip);
+
+      if (!products.length) {
         return res.status(400).json({
-          msg: "Products is not defined",
+          msg: "Product is not defined",
           variant: "error",
           payload: null,
         });
       }
       res.status(200).json({
-        msg: "All product",
+        msg: "All Products",
         variant: "success",
-        payload: product,
+        payload: products,
+        totalCount: products.length,
       });
-    } catch {
+    } catch (error) {
       res.status(500).json({
         msg: "Server error",
         variant: "error",
@@ -26,29 +33,54 @@ class ProductsController {
       });
     }
   }
-  async getCategory(req, res) {
+  async getByCategory(req, res) {
     try {
-      let { categoryId } = req.params;
+      const { limit = 10, skip = 0 } = req.query;
+      const { categoryId } = req.params;
 
-      const product = await Products.find({ categoryId })
-        .populate([
-          { path: "adminId", select: ["fname", "lname"] },
-          { path: "categoryId", select: ["title"] },
-        ])
-        .sort({ createdAt: -1 });
-      if (!product.length) {
-        return res.status(400).json({
-          msg: "Products is not defined",
+      const categoryData = await Category.findById(categoryId);
+      if (!categoryData) {
+        return res.status(404).json({
           variant: "error",
+          msg: "Category not found",
           payload: null,
         });
       }
+
+      const products = await Product.find({ categoryId })
+        .populate([{ path: "categoryId", select: "title" }])
+        .limit(parseInt(limit))
+        .skip(parseInt(skip));
+      const totalCount = await Product.countDocuments({
+        categoryId,
+      });
+
       res.status(200).json({
-        msg: "All product",
+        variant: "success",
+        msg: `All products for category ${categoryData?.title}`,
+        payload: products,
+        totalCount,
+      });
+    } catch (error) {
+      res.status(500).json({
+        variant: "error",
+        msg: "Server error",
+        payload: null,
+      });
+    }
+  }
+  async getProduct(req, res) {
+    try {
+      const { id } = req.params;
+      const product = await Products.findById(id);
+
+      res.status(200).json({
+        msg: " Product successfully",
         variant: "success",
         payload: product,
       });
-    } catch {
+    } catch (error) {
+      console.error(error);
       res.status(500).json({
         msg: "Server error",
         variant: "error",
@@ -110,6 +142,32 @@ class ProductsController {
     } catch (err) {
       res.status(500).json({
         msg: err.message,
+        variant: "error",
+        payload: null,
+      });
+    }
+  }
+  async delete(req, res) {
+    try {
+      const { id } = req.params;
+      const existProduct = await Products.findById(id);
+      if (!existProduct) {
+        return res.status(400).json({
+          msg: "Product is not defined",
+          variant: "warning",
+          payload: null,
+        });
+      }
+      const product = await Products.findByIdAndDelete(id, { new: true });
+
+      res.status(200).json({
+        msg: "Product is deleted",
+        variant: "success",
+        payload: product,
+      });
+    } catch {
+      res.status(500).json({
+        msg: "Server error",
         variant: "error",
         payload: null,
       });

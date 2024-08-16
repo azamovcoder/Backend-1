@@ -42,7 +42,7 @@ const productSchema = new Schema(
     units: {
       type: String,
       required: true,
-      enum: ["kg", "m", "litr"],
+      enum: ["Piece", "Pair", "Quantity"],
     },
     description: {
       type: String,
@@ -81,7 +81,7 @@ export const validateProduct = (body) => {
     Views: Joi.number(),
     categoryId: Joi.string().required(),
     // adminId: Joi.string().required(),
-    units: Joi.string().valid("kg", "m", "litr").required(),
+    units: Joi.string().valid("Piece", "Pair", "Quantity").required(),
     description: Joi.string().required(),
     urls: Joi.array().items(Joi.string().uri()).allow("[]"),
     info: Joi.string(),

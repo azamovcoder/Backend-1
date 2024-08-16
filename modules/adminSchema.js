@@ -51,7 +51,7 @@ export const validateAdmin = (body) => {
     username: Joi.string().required(),
     password: Joi.string().required(),
     isActive: Joi.boolean().allow(true),
-    role: Joi.string().valid("user", "admin", "owner").allow("user"),
+    role: Joi.string().valid("user", "admin", "owner").allow("admin"),
   });
   return schema.validate(body);
 };

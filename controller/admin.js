@@ -121,34 +121,89 @@ class AdminController {
       });
     }
   }
-  async updateAdmin(req, res) {
+  async getOneAdmin(req, res) {
     try {
       const { id } = req.params;
-      if (req.body.password) {
+      const admin = await Admin.findById(id).select("-password");
+
+      res.status(200).json({
+        msg: "Admin  who you choose successfully",
+        variant: "success",
+        payload: admin,
+      });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({
+        msg: "Server error",
+        variant: "error",
+        payload: null,
+      });
+    }
+  }
+  async update(req, res) {
+    try {
+      const { id } = req.params;
+
+      if (req.body.password || req.body.password === "") {
         return res.status(400).json({
-          msg: "PAssword kiritlmasligi kerak",
+          msg: "Password kiritilmasin",
           variant: "error",
           payload: null,
         });
       }
+
+      if (req.body.role || req.body.role === "") {
+        return res.status(400).json({
+          msg: "Role kiritilmasin",
+          variant: "error",
+          payload: null,
+        });
+      }
+
       const { username } = req.body;
       const existingAdmin = await Admin.findOne({ username });
-      if (existingAdmin && id != existingAdmin._id?.toString())
+      if (existingAdmin && id !== existingAdmin._id?.toString())
         return res.status(400).json({
-          msg: "Admin already exists.",
+          msg: "Admin or Owner already exists.",
           variant: "error",
           payload: null,
         });
 
-      let admin = await Admin.findByIdAndUpdate(id, req.body, { new: true });
+      let user = await Admin.findByIdAndUpdate(id, req.body, { new: true });
       res.status(200).json({
-        msg: "Admin updated",
+        msg: "user updated",
+        variant: "success",
+        payload: user,
+      });
+    } catch {
+      res.status(500).json({
+        msg: "server error",
+        variant: "error",
+        payload: null,
+      });
+    }
+  }
+  async delete(req, res) {
+    try {
+      const { id } = req.params;
+      const existBlog = await Admin.findById(id);
+      if (!existBlog) {
+        return res.status(400).json({
+          msg: "Admin is not found",
+          variant: "warning",
+          payload: null,
+        });
+      }
+      const admin = await Admin.findByIdAndDelete(id, { new: true });
+
+      res.status(200).json({
+        msg: "Admin is deleted",
         variant: "success",
         payload: admin,
       });
-    } catch (err) {
+    } catch {
       res.status(500).json({
-        msg: err.message,
+        msg: "Server error",
         variant: "error",
         payload: null,
       });

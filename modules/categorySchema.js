@@ -8,6 +8,11 @@ const categorySchema = new Schema(
       type: String,
       required: true,
     },
+    adminId: {
+      type: Schema.Types.ObjectId,
+      ref: "admin",
+      required: true,
+    },
   },
   {
     timestamps: true,
