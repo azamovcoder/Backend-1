@@ -24,6 +24,7 @@ export const Category = model("category", categorySchema);
 export const validateCategory = (body) => {
   const schema = Joi.object({
     title: Joi.string().required(),
+    adminId: Joi.string(),
   });
   return schema.validate(body);
 };

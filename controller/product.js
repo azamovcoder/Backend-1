@@ -1,6 +1,8 @@
 import { Products, validateProduct } from "../modules/productSchema.js";
 
 import { Category } from "../modules/categorySchema.js";
+import fs from "fs";
+import path from "path";
 
 class ProductsController {
   async get(req, res) {
@@ -151,6 +153,7 @@ class ProductsController {
     try {
       const { id } = req.params;
       const existProduct = await Products.findById(id);
+
       if (!existProduct) {
         return res.status(400).json({
           msg: "Product is not defined",
@@ -158,12 +161,17 @@ class ProductsController {
           payload: null,
         });
       }
-      const product = await Products.findByIdAndDelete(id, { new: true });
+      existProduct?.urls?.forEach((el) => {
+        let name = el.split("/").slice(-1)[0];
+        const filePath = path.join("files", name);
+        fs.unlinkSync(filePath);
+      });
 
+      await Products.findByIdAndDelete(id);
       res.status(200).json({
         msg: "Product is deleted",
         variant: "success",
-        payload: product,
+        payload: existProduct,
       });
     } catch {
       res.status(500).json({
